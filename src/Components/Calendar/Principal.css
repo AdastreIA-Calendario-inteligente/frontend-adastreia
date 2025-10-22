@@ -1,0 +1,113 @@
+.demo-app-main {
+    --fc-border-color: white;
+    --fc-button-bg-color: #fff;
+    --fc-button-text-color: #530b5b;
+
+    margin: 0 8rem; 
+}
+
+.chat-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #530b5b;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    z-index: 1000;
+  }
+  
+  .chat-icon:hover {
+    background-color: #C8A2C8;
+  }
+
+  .chat-window {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 300px;
+    height: 400px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-header {
+    background-color: #530b5b;
+    color: #fff;
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    position: relative;
+  }
+  
+  .chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .chat-message {
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+  }
+  .chat-close-button {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .chat-close-button:hover {
+    color: #ffcccc;
+  }
+
+  .fc-col-header-cell-cushion {
+    color: #530b5b !important;
+  }
+
+  .fc-daygrid-day-number {
+    color: #fff !important;
+  }
+
+  .fc-toolbar-title {
+    color: #530b5b !important;  /* cor do texto do título "October 2025" */
+  }
+
+  /*  aqui */
+
+
+.fc-button-primary {
+    background-color: #fff !important; /* cor de fundo dos botões */
+    border-color: #fff !important;
+    color: #530b5b !important;         /* cor do texto */
+  }
+  
+  .fc-button-primary:hover {
+    background-color: #f0d8f3 !important; /* cor de fundo no hover */
+    border-color: #f0d8f3 !important;
+  }
+  
+  .fc-button-active {
+    background-color: #530b5b !important; /* fundo do botão ativo ("month") */
+    color: #fff !important;               /* texto do botão ativo */
+    border-color: #530b5b !important;
+  }

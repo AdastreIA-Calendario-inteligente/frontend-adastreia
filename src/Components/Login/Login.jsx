@@ -2,6 +2,7 @@ import React from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useState } from "react";
 import "./Login.css";
+import { useNavigate } from "react-router-dom"; 
 import { Link } from "react-router-dom";
 
 <p>
@@ -12,12 +13,33 @@ const Login = () => {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
-        // passe aqui o envio para o nosso backend
-        event.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault(); 
 
-    }
+        try {
+          
+            // const response = await fetch("https://nossa-api/login", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({ username, password }),
+            // });
+            const mockResponse = { ok: true };
+
+
+            if (mockResponse.ok) {
+                navigate("/principal");
+            } else {
+                alert("Usuário ou senha inválidos!");
+            }
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            alert("Ocorreu um erro. Tente novamente mais tarde.");
+        }
+    };
 
     return(
         <div className="container">
