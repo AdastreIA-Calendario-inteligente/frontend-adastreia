@@ -7,9 +7,18 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
   const [end, setEnd] = useState(eventData?.end || "");
   const [departure, setDeparture] = useState(eventData?.departure || "");
   const [arrival, setArrival] = useState(eventData?.arrival || "");
+  const [locomotion, setLocomotion] = useState(eventData?.locomotion || "driving");
 
-  const handleSubmit = (e) => {
+  const locomotionOptions = {
+    driving: "Carro",
+    walking: "Andando",
+    bicycling: "Bicicleta",
+    transit: "Transporte público",
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     const newEvent = {
       title,
       start,
@@ -17,8 +26,61 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
       extendedProps: {
         departure,
         arrival,
+        locomotion,
       },
     };
+  
+    const apiUrl = "/api/mapas e clima/rota_com_clima";
+    const requestBody = {
+      origin: departure,
+      destination: arrival,
+      mode: locomotion,
+    };
+  
+    console.log("Começando conexão com API de rota e clima...");
+  
+    try {
+      console.log("Chamando API de rota e clima...");
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Erro na resposta da API de rota e clima");
+      }
+  
+      const data = await response.json();
+      console.log("Resposta da API de rota e clima:", data);
+  
+      const city = data.weather_forecast.city;
+  
+      const weatherApiUrl = `/api/weather/forecast?destination=${encodeURIComponent(city)}`;
+
+  
+      console.log("Chamando API de previsão do tempo...");
+      const weatherResponse = await fetch(weatherApiUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+  
+      if (!weatherResponse.ok) {
+        throw new Error("Erro na resposta da API de previsão do tempo");
+      }
+  
+      const weatherData = await weatherResponse.json();
+      console.log("Resposta da API de previsão do tempo:", weatherData);
+  
+    } catch (error) {
+      console.error("Erro ao chamar as APIs:", error);
+    }
+  
     onSave(newEvent);
     onClose();
   };
@@ -77,6 +139,20 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
               onChange={(e) => setArrival(e.target.value)}
               required
             />
+          </label>
+          <label>
+            Locomoção:
+            <select
+              value={locomotion}
+              onChange={(e) => setLocomotion(e.target.value)}
+              required
+            >
+              {Object.entries(locomotionOptions).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </label>
           <button type="submit">Salvar</button>
         </form>
