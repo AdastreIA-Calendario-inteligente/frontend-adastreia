@@ -1,0 +1,104 @@
+.config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 22%; 
+    height: 100%;
+    background-color: rgba(241, 234, 234, 0.95);
+    color: #530b5b;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .config-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .config-close-button {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: #530b5b;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .config-option {
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .toggle-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 16px;
+    color: #530b5b;
+  }
+  
+  .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 25px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 25px;
+    transition: 0.4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 2.5px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #530b5b;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(25px);
+  }
+  .logout-button {
+    background-color: #530b5b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    align-self: center;
+    transition: background-color 0.3s;
+  }
+  
+  .logout-button:hover {
+    background-color: #7a2b85;
+  }

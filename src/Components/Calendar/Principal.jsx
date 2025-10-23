@@ -1,18 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { FaComments } from "react-icons/fa";
+import interactionPlugin from "@fullcalendar/interaction";
+import { FaComments, FaCog } from "react-icons/fa";
 import "./Principal.css";
+import EventModal from '/src/Components/Event/EventModal';
+import Config from "../Config/Config";
 
 const Principal = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false); 
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, [isDarkMode]);
 
   const handleChatClick = () => {
     setIsChatOpen(true);
     const newMessage = "Resumo de hoje";
     setMessages((prevMessages) => [...prevMessages, newMessage]);
-    speakMessage(newMessage); // Lê a mensagem em voz alta
+    if (isSoundEnabled) speakMessage(newMessage); 
   };
 
   const handleCloseChat = () => {
@@ -22,17 +39,48 @@ const Principal = () => {
   const speakMessage = (message) => {
     if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = "pt-BR"; // Define o idioma para português
+      utterance.lang = "pt-BR";
       window.speechSynthesis.speak(utterance);
     } else {
       console.error("A API de síntese de fala não é suportada neste navegador.");
     }
   };
 
+  const handleDateClick = (info) => {
+    setSelectedEvent({
+      start: info.dateStr,
+      end: info.dateStr,
+    });
+    setIsEventModalOpen(true);
+  };
+
+  const handleEventSave = (newEvent) => {
+    if (selectedEvent?.id) {
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === selectedEvent.id ? { ...event, ...newEvent } : event
+        )
+      );
+    } else {
+      setEvents((prevEvents) => [
+        ...prevEvents,
+        { id: Date.now().toString(), ...newEvent },
+      ]);
+    }
+    setSelectedEvent(null);
+  };
+
+  const handleEventDelete = (id) => {
+    setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
+  };
+
   return (
-    <div className="demo-app-main">
+    <div className={`demo-app-main ${isDarkMode ? "dark-mode" : ""}`}>
+      <div className="config-icon" onClick={() => setIsConfigOpen(true)}>
+        <FaCog size={30} color="#530b5b" />
+      </div>
       <FullCalendar
-        plugins={[dayGridPlugin]}
+        plugins={[dayGridPlugin, interactionPlugin]}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
@@ -42,7 +90,27 @@ const Principal = () => {
         editable={false}
         selectable={false}
         dayMaxEvents={true}
+        dateClick={handleDateClick}
+        events={events}
       />
+      {isEventModalOpen && (
+        <EventModal
+          onClose={() => setIsEventModalOpen(false)} 
+          onSave={handleEventSave} 
+          eventData={selectedEvent} 
+          isDarkMode={isDarkMode} 
+
+        />
+      )}
+      {isConfigOpen && (
+        <Config
+          onClose={() => setIsConfigOpen(false)}
+          isSoundEnabled={isSoundEnabled}
+          setIsSoundEnabled={setIsSoundEnabled}
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
+        />
+      )}
       <div className="chat-icon" onClick={handleChatClick}>
         <FaComments size={30} color="#fff" />
       </div>

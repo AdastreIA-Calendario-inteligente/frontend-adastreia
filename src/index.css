@@ -1,2 +1,7 @@
 body {
-    background-color: #C8A2C8;}
+    background-color: #C8A2C8;
+}
+
+body.dark-mode {
+    background-color: #000; /* Define o fundo como preto no modo escuro */
+}
