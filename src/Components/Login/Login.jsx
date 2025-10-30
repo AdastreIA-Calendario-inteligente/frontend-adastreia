@@ -10,7 +10,7 @@ const Login = ({ onLogin }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch("/api/usuarios/login", {
         method: "POST",
@@ -19,10 +19,11 @@ const Login = ({ onLogin }) => {
         },
         body: JSON.stringify({ email, senha: password }),
       });
-
+  
       if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("authToken", data.token); 
+        const data = await response.json(); 
+        console.log("Resposta da API:", data);
+        localStorage.setItem("authToken", data.access_token);
         onLogin();
         navigate("/principal");
       } else {
