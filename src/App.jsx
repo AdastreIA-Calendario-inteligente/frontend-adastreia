@@ -7,10 +7,10 @@ import Principal from './Components/Calendar/Principal';
 import Config from './Components/Config/Config';
 
 const App = () => {
-  // tem que ser false para autentirar (lembrar)
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
-   const handleLogin = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = () => {
     setIsAuthenticated(true);
   };
 

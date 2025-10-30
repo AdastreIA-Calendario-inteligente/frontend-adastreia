@@ -16,7 +16,7 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
     transit: "Transporte público",
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
   
     const newEvent = {
@@ -39,47 +39,46 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
   
     console.log("Começando conexão com API de rota e clima...");
   
-    try {
-      console.log("Chamando API de rota e clima...");
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(requestBody),
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erro na resposta da API de rota e clima");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Resposta da API de rota e clima:", data);
+  
+        const city = data.weather_forecast.city;
+        const weatherApiUrl = `/api/weather/forecast?destination=${encodeURIComponent(city)}`;
+  
+        console.log("Chamando API de previsão do tempo...");
+        return fetch(weatherApiUrl, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+      })
+      .then((weatherResponse) => {
+        if (!weatherResponse.ok) {
+          throw new Error("Erro na resposta da API de previsão do tempo");
+        }
+        return weatherResponse.json();
+      })
+      .then((weatherData) => {
+        console.log("Resposta da API de previsão do tempo:", weatherData);
+      })
+      .catch((error) => {
+        console.error("Erro ao chamar as APIs:", error);
       });
-  
-      if (!response.ok) {
-        throw new Error("Erro na resposta da API de rota e clima");
-      }
-  
-      const data = await response.json();
-      console.log("Resposta da API de rota e clima:", data);
-  
-      const city = data.weather_forecast.city;
-  
-      const weatherApiUrl = `/api/weather/forecast?destination=${encodeURIComponent(city)}`;
-
-  
-      console.log("Chamando API de previsão do tempo...");
-      const weatherResponse = await fetch(weatherApiUrl, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-  
-      if (!weatherResponse.ok) {
-        throw new Error("Erro na resposta da API de previsão do tempo");
-      }
-  
-      const weatherData = await weatherResponse.json();
-      console.log("Resposta da API de previsão do tempo:", weatherData);
-  
-    } catch (error) {
-      console.error("Erro ao chamar as APIs:", error);
-    }
   
     onSave(newEvent);
     onClose();
