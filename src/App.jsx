@@ -25,7 +25,7 @@ const App = () => {
         <Routes>
           {!isAuthenticated ? (
             <>
-              <Route path="/" element={<Login onLogin={handleLogin} />} />
+              <Route path="/" element={<div className="entrada"><Login onLogin={handleLogin} /></div>} />
               <Route path="/register" element={<div className="entrada"><Register /></div>} />
               <Route path="/login" element={<div className="entrada"><Login onLogin={handleLogin} /></div>} />
               <Route path="*" element={<Navigate to="/login" />} />
