@@ -1,12 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Config.css";
 
 const Config = ({ onClose, isSoundEnabled, setIsSoundEnabled, isDarkMode, setIsDarkMode, onLogout }) => {
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    // Limpa o estado de autenticação (exemplo: localStorage)
-    localStorage.removeItem("authToken");
-    // Chama a função de logout passada como prop
     onLogout();
+    navigate("/login");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (

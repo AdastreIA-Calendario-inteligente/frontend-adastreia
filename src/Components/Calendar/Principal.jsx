@@ -6,8 +6,10 @@ import { FaComments, FaCog } from "react-icons/fa";
 import "./Principal.css";
 import EventModal from '/src/Components/Event/EventModal';
 import Config from "../Config/Config";
+import { useNavigate } from "react-router-dom";
 
 const Principal = () => {
+  const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -30,6 +32,12 @@ const Principal = () => {
     const newMessage = "Resumo de hoje";
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     if (isSoundEnabled) speakMessage(newMessage); 
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); 
+    console.log("Usuário deslogado");
+    navigate("/login");
   };
 
   const handleCloseChat = () => {
@@ -109,6 +117,7 @@ const Principal = () => {
           setIsSoundEnabled={setIsSoundEnabled}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
+          onLogout={handleLogout}
         />
       )}
       <div className="chat-icon" onClick={handleChatClick}>

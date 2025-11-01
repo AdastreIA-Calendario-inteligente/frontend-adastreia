@@ -19,6 +19,9 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
   
+   
+    const [eventDate, eventTime] = start.split("T");
+  
     const newEvent = {
       title,
       start,
@@ -57,7 +60,10 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
         console.log("Resposta da API de rota e clima:", data);
   
         const city = data.weather_forecast.city;
-        const weatherApiUrl = `/api/weather/forecast?destination=${encodeURIComponent(city)}`;
+  
+        const weatherApiUrl = `/api/weather/forecast?destination=${encodeURIComponent(
+          city
+        )}&event_date_str=${encodeURIComponent(eventDate)}&event_time_str=${encodeURIComponent(eventTime)}`;
   
         console.log("Chamando API de previsão do tempo...");
         return fetch(weatherApiUrl, {
