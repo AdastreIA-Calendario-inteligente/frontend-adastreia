@@ -12,18 +12,30 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
   
     try {
+      
+      const formData = new URLSearchParams();
+      formData.append("grant_type", "");
+      formData.append("username", email);
+      formData.append("password", password);
+      formData.append("scope", "");
+      formData.append("client_id", "");
+      formData.append("client_secret", "");
+  
       const response = await fetch("/api/usuarios/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
         },
-        body: JSON.stringify({ email, senha: password }),
+        body: formData.toString(), 
       });
   
       if (response.ok) {
-        const data = await response.json(); 
+        const data = await response.json();
         console.log("Resposta da API:", data);
-        localStorage.setItem("authToken", data.access_token);
+  
+        localStorage.setItem('access_token', data.access_token);
+  
         onLogin();
         navigate("/principal");
       } else {

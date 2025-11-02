@@ -8,6 +8,7 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
   const [departure, setDeparture] = useState(eventData?.departure || "");
   const [arrival, setArrival] = useState(eventData?.arrival || "");
   const [locomotion, setLocomotion] = useState(eventData?.locomotion || "driving");
+  const [isOutdoor, setIsOutdoor] = useState(eventData?.isOutdoor || false);
 
   const locomotionOptions = {
     driving: "Carro",
@@ -19,36 +20,37 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
   
-   
-    const [eventDate, eventTime] = start.split("T");
+    const horaInicio = start;
+    const horaFim = end;
+    const [eventDate] = start.split("T");
   
     const newEvent = {
       title,
-      start,
-      end,
+      start: horaInicio,
+      end: horaFim,
       extendedProps: {
         departure,
         arrival,
         locomotion,
+        isOutdoor,
       },
     };
   
-    const apiUrl = "/api/mapas e clima/rota_com_clima";
-    const requestBody = {
-      origin: departure,
-      destination: arrival,
-      mode: locomotion,
-    };
+    const apiUrl = `/api/mapas%20e%20clima/rota_com_clima?origin=${encodeURIComponent(
+      departure
+    )}&destination=${encodeURIComponent(arrival)}&mode=${encodeURIComponent(
+      locomotion
+    )}&event_date_str=${encodeURIComponent(eventDate)}&event_time_str=${encodeURIComponent(
+      horaInicio.split("T")[1]
+    )}`;
   
     console.log("Começando conexão com API de rota e clima...");
   
     fetch(apiUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify(requestBody),
     })
       .then((response) => {
         if (!response.ok) {
@@ -58,38 +60,65 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
       })
       .then((data) => {
         console.log("Resposta da API de rota e clima:", data);
-  
-        const city = data.weather_forecast.city;
-  
-        const weatherApiUrl = `/api/weather/forecast?destination=${encodeURIComponent(
-          city
-        )}&event_date_str=${encodeURIComponent(eventDate)}&event_time_str=${encodeURIComponent(eventTime)}`;
-  
-        console.log("Chamando API de previsão do tempo...");
-        return fetch(weatherApiUrl, {
-          method: "GET",
+      
+        const distance = data.route_details.distance;
+        const duration = data.route_details.duration;
+        const temperature = data.weather_forecast.forecast.temperature_celsius || 0;
+        const weather = data.weather_forecast.forecast.condition || null;
+      
+        const eventPayload = {
+          nome: title,
+          local: arrival,
+          duracao: duration,
+          hora_inicio: horaInicio.split("T")[1],
+          hora_fim: horaFim.split("T")[1],
+          temperatura: temperature,
+          clima: weather,
+          local_de_saida: departure,
+          transporte: locomotionOptions[locomotion],
+          distancia: distance,
+          data_do_evento: eventDate,
+          tipos_evento: [
+            {
+              tipo: isOutdoor ? "aberto" : "fechado",
+            },
+          ],
+        };
+      
+        console.log("Enviando para o backend:", eventPayload);
+
+        const token = localStorage.getItem('access_token');
+    
+        if (token) { // Pegue o token correto do localStorage
+          console.log("Token JWT encontrado:", token);
+        } else {
+          console.warn("Token JWT não está disponível no localStorage.");
+        }
+    
+        return fetch("/api/eventos/", {
+          method: "POST",
           headers: {
-            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : undefined, // Passa o token se existir
           },
+          body: JSON.stringify(eventPayload),
         });
       })
-      .then((weatherResponse) => {
-        if (!weatherResponse.ok) {
-          throw new Error("Erro na resposta da API de previsão do tempo");
+      .then((backendResponse) => {
+        if (!backendResponse.ok) {
+          throw new Error("Erro ao salvar o evento no backend");
         }
-        return weatherResponse.json();
+        return backendResponse.json();
       })
-      .then((weatherData) => {
-        console.log("Resposta da API de previsão do tempo:", weatherData);
+      .then((savedEvent) => {
+        console.log("Evento salvo com sucesso no backend:", savedEvent);
+        onSave(newEvent);
+        onClose();
       })
       .catch((error) => {
-        console.error("Erro ao chamar as APIs:", error);
+        console.error("Erro ao processar o evento:", error);
       });
-  
-    onSave(newEvent);
-    onClose();
   };
-
   return (
     <div className={`event-modal ${isDarkMode ? "dark-mode" : ""}`}>
       <div className="event-modal-content">
@@ -128,7 +157,7 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
             />
           </label>
           <label>
-            Local de Partida:
+            Local de Partida
             <input
               type="text"
               value={departure}
@@ -146,7 +175,7 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
             />
           </label>
           <label>
-            Locomoção:
+            Locomoção
             <select
               value={locomotion}
               onChange={(e) => setLocomotion(e.target.value)}
@@ -157,6 +186,16 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
                   {value}
                 </option>
               ))}
+            </select>
+          </label>
+          <label>
+            Atividade ao ar livre
+            <select
+              value={isOutdoor ? "sim" : "nao"}
+              onChange={(e) => setIsOutdoor(e.target.value === "sim")}
+            >
+              <option value="sim">Sim</option>
+              <option value="nao">Não</option>
             </select>
           </label>
           <button type="submit">Salvar</button>
