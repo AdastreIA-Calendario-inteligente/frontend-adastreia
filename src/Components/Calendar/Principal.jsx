@@ -18,6 +18,7 @@ const Principal = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false); 
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -26,6 +27,38 @@ const Principal = () => {
       document.body.classList.remove("dark-mode");
     }
   }, [isDarkMode]);
+
+  const fetchUserData = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.error("Token não encontrado");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/usuarios/me", {
+        method: "GET",
+        headers: {
+          "accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados do usuário");
+      }
+
+      const data = await response.json();
+      setUserData(data);
+      console.log("Dados do usuário:", data);
+    } catch (error) {
+      console.error("Erro na chamada da API:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData(); 
+  }, []);
 
   const handleChatClick = () => {
     setIsChatOpen(true);
