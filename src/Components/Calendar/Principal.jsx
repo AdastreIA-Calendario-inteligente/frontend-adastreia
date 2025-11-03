@@ -34,7 +34,7 @@ const Principal = () => {
       console.error("Token não encontrado");
       return;
     }
-
+  
     try {
       const response = await fetch("/api/usuarios/me", {
         method: "GET",
@@ -43,13 +43,39 @@ const Principal = () => {
           "Authorization": `Bearer ${token}`
         }
       });
-
+  
       if (!response.ok) {
         throw new Error("Erro ao buscar dados do usuário");
       }
-
+  
       const data = await response.json();
       setUserData(data);
+  
+  
+      if (data?.calendarios) {
+        const formattedEvents = data.calendarios.flatMap((calendario) =>
+          calendario.eventos.flatMap((evento) =>
+            evento.datas.map((dataEvento) => ({
+              id: evento.id_evento,
+              title: evento.nome,
+              start: `${dataEvento.data}T${evento.hora_inicio.split("T")[1]}`,
+              end: `${dataEvento.data}T${evento.hora_fim.split("T")[1]}`,
+              extendedProps: {
+                clima: evento.clima,
+                temperatura: evento.temperatura,
+                local: evento.local,
+                local_de_saida: evento.local_de_saida,
+                distancia: evento.distancia,
+                duracao: evento.duracao,
+                transporte: evento.transporte,
+                tipos: evento.tipos.map((tipo) => tipo.tipo),
+              },
+            }))
+          )
+        );
+        setEvents(formattedEvents);
+      }
+  
       console.log("Dados do usuário:", data);
     } catch (error) {
       console.error("Erro na chamada da API:", error);
