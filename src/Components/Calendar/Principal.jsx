@@ -109,7 +109,7 @@ const Principal = () => {
         transporte: event.extendedProps?.transporte,
       }));
   
-      const prompt = `faca um relatorio breve, uma meia linha para cada info informacoes dos meus eventos, veja se ta um bom dia e se minhas escolhas estao boa de tempo, se posso sofrer algum atraso ou coisas do genero. Eventos: ${JSON.stringify(
+      const prompt = `faca um relatorio breve, de forma fluida sem separar em topicos, meia linha para cada info informacoes dos meus eventos, veja se ta um bom dia e se minhas escolhas estao boa de tempo, se posso sofrer algum atraso ou coisas do genero. Eventos: ${JSON.stringify(
         eventDetails
       )}`;
   
