@@ -1,75 +1,112 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaUser, FaLock } from "react-icons/fa";
 import "../Login/Login.css";
 
-const Register = () => {
-  const [name, setName] = useState("");
+// Componente de Login
+const Login = ({ onLogin }) => {
+  // Estados para armazenar o e-mail e a senha do usuário
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Hook para navegação entre páginas
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-  
+  // Função para lidar com o envio do formulário de login
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Evita o comportamento padrão do formulário
+
     try {
-      const response = await fetch("/api/usuarios/", {
-        method: "POST",
+      // Cria os dados do formulário no formato URL-encoded
+      const formData = new URLSearchParams();
+      formData.append("grant_type", ""); // Campo vazio, pode ser configurado conforme necessário
+      formData.append("username", email); // Adiciona o e-mail do usuário
+      formData.append("password", password); // Adiciona a senha do usuário
+      formData.append("scope", ""); // Campo vazio, pode ser configurado conforme necessário
+      formData.append("client_id", ""); // Campo vazio, pode ser configurado conforme necessário
+      formData.append("client_secret", ""); // Campo vazio, pode ser configurado conforme necessário
+
+      // Faz a requisição para a API de login
+      const response = await fetch("/api/usuarios/login", {
+        method: "POST", // Método POST para envio de dados
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded", // Define o tipo de conteúdo
+          Accept: "application/json", // Aceita resposta em JSON
         },
-        body: JSON.stringify({ nome: name, email, senha: password }), 
+        body: formData.toString(), // Converte os dados do formulário para string
       });
-  
+
+      // Verifica se a resposta foi bem-sucedida
       if (response.ok) {
-        alert("Usuário registrado com sucesso!");
-        navigate("/login");
+        const data = await response.json(); // Converte a resposta para JSON
+        console.log("Resposta da API:", data);
+
+        // Armazena o token de acesso no localStorage
+        localStorage.setItem("access_token", data.access_token);
+
+        // Chama a função de login passada como prop
+        onLogin();
+
+        // Redireciona o usuário para a página principal
+        navigate("/principal");
       } else {
+        // Caso a resposta não seja bem-sucedida, exibe uma mensagem de erro
         const errorData = await response.json();
-        alert(`Erro ao registrar: ${errorData.message}`);
+        alert(`Erro ao fazer login: ${errorData.message}`);
       }
     } catch (error) {
-      console.error("Erro ao registrar:", error);
+      // Trata erros de conexão ou outros problemas
+      console.error("Erro ao fazer login:", error);
       alert("Ocorreu um erro. Tente novamente mais tarde.");
     }
   };
 
   return (
+    // Estrutura da tela de login
     <div className="container">
-      <h1>Registrar</h1>
-      <form onSubmit={handleRegister}>
-        <div className="input-field">
-          <input
-            type="text"
-            placeholder="Nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+      <form onSubmit={handleLogin}>
+        {/* Título da aplicação */}
+        <h1>Adastrel IA</h1>
+
+        {/* Campo de entrada para o e-mail */}
         <div className="input-field">
           <input
             type="email"
             placeholder="E-mail"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)} // Atualiza o estado do e-mail
           />
+          <FaUser className="icon" /> {/* Ícone de usuário */}
         </div>
+
+        {/* Campo de entrada para a senha */}
         <div className="input-field">
           <input
             type="password"
             placeholder="Senha"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)} // Atualiza o estado da senha
           />
+          <FaLock className="icon" /> {/* Ícone de cadeado */}
         </div>
-        <button type="submit">Registrar</button>
+
+        {/* Link para recuperação de senha */}
+        <div className="recall-forget">
+          <a href="#">Esqueceu a senha?</a>
+        </div>
+
+        {/* Botão para enviar o formulário de login */}
+        <button type="submit">Entrar</button>
+
+        {/* Link para a página de registro */}
+        <div className="signup-link">
+          <p>
+            Não tem uma conta? <a href="/register">Registrar</a>
+          </p>
+        </div>
       </form>
-      <div className="signup-link">
-        <p>
-          Já tem uma conta? <a href="/login">Faça login</a>
-        </p>
-      </div>
     </div>
   );
 };
 
-export default Register;
+export default Login;
