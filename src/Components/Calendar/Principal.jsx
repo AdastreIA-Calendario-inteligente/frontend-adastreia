@@ -86,11 +86,64 @@ const Principal = () => {
     fetchUserData(); 
   }, []);
 
-  const handleChatClick = () => {
+  const handleChatClick = async () => {
+    const today = new Date();
+    const eventsToday = events.filter((event) => {
+      const eventDate = new Date(event.start);
+      return (
+        eventDate.getFullYear() === today.getFullYear() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getDate() === today.getDate()
+      );
+    });
+  
+    if (eventsToday.length > 0) {
+      const eventDetails = eventsToday.map((event) => ({
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        local: event.extendedProps?.local,
+        clima: event.extendedProps?.clima,
+        temperatura: event.extendedProps?.temperatura,
+        duracao: event.extendedProps?.duracao,
+        transporte: event.extendedProps?.transporte,
+      }));
+  
+      const prompt = `faca um relatorio breve, uma meia linha para cada info informacoes dos meus eventos, veja se ta um bom dia e se minhas escolhas estao boa de tempo, se posso sofrer algum atraso ou coisas do genero. Eventos: ${JSON.stringify(
+        eventDetails
+      )}`;
+  
+      try {
+        const response = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        });
+  
+        if (!response.ok) {
+          throw new Error("Erro ao chamar a API de chat");
+        }
+  
+        const data = await response.json();
+        setMessages((prevMessages) => [...prevMessages, data.response]);
+        if (isSoundEnabled) speakMessage(data.response);
+      } catch (error) {
+        console.error("Erro ao chamar a API:", error);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          "Erro ao obter resposta do chat.",
+        ]);
+      }
+    } else {
+      const noEventsMessage = "Sua agenda está vazia.";
+      setMessages((prevMessages) => [...prevMessages, noEventsMessage]);
+      if (isSoundEnabled) speakMessage(noEventsMessage);
+    }
+  
     setIsChatOpen(true);
-    const newMessage = "Resumo de hoje";
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-    if (isSoundEnabled) speakMessage(newMessage); 
   };
 
   const handleLogout = () => {
@@ -100,7 +153,11 @@ const Principal = () => {
   };
 
   const handleCloseChat = () => {
-    setIsChatOpen(false);
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    setMessages([]);
+    setIsChatOpen(false); 
   };
 
   const speakMessage = (message) => {
