@@ -21,6 +21,9 @@ const Principal = () => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(true); // Controle do som
   const [isDarkMode, setIsDarkMode] = useState(false); // Controle do modo escuro
   const [userData, setUserData] = useState(null); // Dados do usuário
+  const [userInput, setUserInput] = useState("");
+  const [showUserInput, setShowUserInput] = useState(false);
+
 
   // Efeito para aplicar o modo escuro ao corpo da página
   useEffect(() => {
@@ -30,6 +33,33 @@ const Principal = () => {
       document.body.classList.remove("dark-mode");
     }
   }, [isDarkMode]);
+
+  const handleEventClick = (info) => {
+    const formatDateTime = (date) => {
+      if (!date) return "";
+      const d = new Date(date);
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+  
+    setSelectedEvent({
+      id: info.event.id,
+      title: info.event.title,
+      start: formatDateTime(info.event.start),
+      end: formatDateTime(info.event.end),
+      departure: info.event.extendedProps?.local_de_saida || "",
+      arrival: info.event.extendedProps?.local || "",
+      locomotion: info.event.extendedProps?.transporte || "driving",
+      isOutdoor: info.event.extendedProps?.tipos?.includes("aberto") || false,
+      temperature: info.event.extendedProps?.temperatura || "",
+      weather: info.event.extendedProps?.clima || "",
+      distance: info.event.extendedProps?.distancia || "",
+      duration: info.event.extendedProps?.duracao || "",
+    });
+    setIsEventModalOpen(true);
+  };
+  
+  
 
   // Função para buscar dados do usuário autenticado
   const fetchUserData = async () => {
@@ -91,7 +121,55 @@ const Principal = () => {
   useEffect(() => {
     fetchUserData(); 
   }, []);
-
+  
+  const handleUserPromptSend = async () => {
+    if (!userInput.trim()) return;
+    const today = new Date();
+    const eventsToday = events.filter((event) => {
+      const eventDate = new Date(event.start);
+      return (
+        eventDate.getFullYear() === today.getFullYear() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getDate() === today.getDate()
+      );
+    });
+    const eventDetails = eventsToday.map((event) => ({
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      local: event.extendedProps?.local,
+      clima: event.extendedProps?.clima,
+      temperatura: event.extendedProps?.temperatura,
+      duracao: event.extendedProps?.duracao,
+      transporte: event.extendedProps?.transporte,
+    }));
+  
+    const prompt = `${userInput}\nEventos: ${JSON.stringify(eventDetails)}`;
+  
+    try {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
+  
+      if (!response.ok) throw new Error("Erro ao chamar a API de chat");
+  
+      const data = await response.json();
+      setMessages((prevMessages) => [...prevMessages, data.response]);
+      if (isSoundEnabled) speakMessage(data.response);
+    } catch (error) {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        "Erro ao obter resposta do chat.",
+      ]);
+    }
+    setUserInput("");
+  };
+  
   // Função para lidar com o clique no ícone de chat
   const handleChatClick = async () => {
     const today = new Date(); // Data atual
@@ -101,6 +179,7 @@ const Principal = () => {
         eventDate.getFullYear() === today.getFullYear() &&
         eventDate.getMonth() === today.getMonth() &&
         eventDate.getDate() === today.getDate()
+        
       );
     });
   
@@ -155,6 +234,7 @@ const Principal = () => {
     }
   
     setIsChatOpen(true); // Abre a janela de chat
+    setShowUserInput(true);
   };
 
   // Função para lidar com o logout do usuário
@@ -237,6 +317,7 @@ const Principal = () => {
         selectable={false}
         dayMaxEvents={true}
         dateClick={handleDateClick}
+        eventClick={handleEventClick} 
         events={events}
       />
 
@@ -269,22 +350,35 @@ const Principal = () => {
 
       {/* Janela de chat */}
       {isChatOpen && (
-        <div className="chat-window">
-          <div className="chat-header">
-            Chat
-            <button className="chat-close-button" onClick={handleCloseChat}>
-              X
-            </button>
-          </div>
-          <div className="chat-messages">
-            {messages.map((message, index) => (
-              <div key={index} className="chat-message">
-                {message}
-              </div>
-            ))}
-          </div>
+  <div className="chat-window">
+    <div className="chat-header">
+      Chat
+      <button className="chat-close-button" onClick={handleCloseChat}>
+        X
+      </button>
+    </div>
+    <div className="chat-messages">
+      {messages.map((message, index) => (
+        <div key={index} className="chat-message">
+          {message}
         </div>
-      )}
+      ))}
+    </div>
+    {showUserInput && (
+      <div className="chat-input-container">
+        <input
+          type="text"
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          placeholder="Digite sua mensagem..."
+          onKeyDown={(e) => e.key === "Enter" && handleUserPromptSend()}
+        />
+        <button onClick={handleUserPromptSend}>Enviar</button>
+      </div>
+    )}
+  </div>
+)}
+
     </div>
   );
 };

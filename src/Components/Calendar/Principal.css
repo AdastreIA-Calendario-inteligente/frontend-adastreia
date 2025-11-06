@@ -161,3 +161,47 @@
   .dark-mode .chat-close-button {
     color: #fff;
   }
+
+  .chat-input-container {
+    display: flex;
+    padding: 10px;
+    background: #f0d8f3;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  
+  .chat-input-container input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #530b5b;
+    border-radius: 5px;
+    font-family: "Playfair Display", serif;
+    font-size: 1rem;
+    color: #530b5b;
+    background: #fff;
+    outline: none;
+    margin-right: 10px;
+    transition: border-color 0.2s;
+  }
+  
+  .chat-input-container input[type="text"]:focus {
+    border-color: #C8A2C8;
+  }
+  
+  .chat-input-container button {
+    background: #530b5b;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 18px;
+    font-family: "Playfair Display", serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .chat-input-container button:hover {
+    background: #C8A2C8;
+    color: #530b5b;
+  }
+  

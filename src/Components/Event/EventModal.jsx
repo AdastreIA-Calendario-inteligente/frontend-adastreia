@@ -146,6 +146,20 @@ const EventModal = ({ onClose, onSave, eventData, isDarkMode }) => {
             X
           </button>
         </div>
+
+          {eventData?.id && (
+            <div className="event-extra-info">
+                {eventData.temperature && (
+                  <p><strong>Temperatura:</strong> {eventData.temperature}</p>)}
+                {eventData.weather && (
+                  <p><strong>Clima:</strong> {eventData.weather}</p>)}
+                {eventData.distance && (
+                  <p><strong>Distância:</strong> {eventData.distance}</p>)}
+                {eventData.duration && (
+                <p><strong>Duração do percurso:</strong> {eventData.duration}</p>)}
+           </div>
+)}
+
         {/* Formulário para criar ou editar evento */}
         <form onSubmit={handleSubmit}>
           <label>
